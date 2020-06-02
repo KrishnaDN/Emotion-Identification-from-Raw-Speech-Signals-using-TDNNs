@@ -38,8 +38,6 @@ parser.add_argument('-num_epochs', action="store_true", default=100)
 args = parser.parse_args()
 
 ### Data related
-dataset_train = SpeechDataGenerator(manifest=args.training_filepath,mode='train')
-dataloader_train = DataLoader(dataset_train, batch_size=args.batch_size,shuffle=True,collate_fn=speech_collate) 
 
 dataset_test = SpeechDataGenerator(manifest=args.testing_filepath,mode='test')
 dataloader_test = DataLoader(dataset_test, batch_size=args.batch_size,shuffle=True,collate_fn=speech_collate) 
@@ -48,43 +46,10 @@ dataloader_test = DataLoader(dataset_test, batch_size=args.batch_size,shuffle=Tr
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 model = Emo_Raw_TDNN(args.input_dim, args.num_classes).to(device)
+model.load_state_dict(torch.load('save_model/best_check_point_92_0.7870102085965744')['model'])
 optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0, betas=(0.9, 0.98), eps=1e-9)
 loss_fun = nn.CrossEntropyLoss()
 
-
-
-def train(dataloader_train,epoch):
-    train_loss_list=[]
-    full_preds=[]
-    full_gts=[]
-    model.train()
-    for i_batch, sample_batched in enumerate(dataloader_train):
-        
-        features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
-        labels = torch.from_numpy(np.asarray([torch_tensor[0].numpy() for torch_tensor in sample_batched[1]]))
-        features, labels = features.to(device),labels.to(device)
-        features.requires_grad = True
-        optimizer.zero_grad()
-        pred_logits = model(features)
-        #### CE loss
-        loss = loss_fun(pred_logits,labels)
-        loss.backward()
-        optimizer.step()
-        train_loss_list.append(loss.item())
-        #train_acc_list.append(accuracy)
-        if i_batch%10==0:
-            print('Loss {} after {} iteration'.format(np.mean(np.asarray(train_loss_list)),i_batch))
-        
-        predictions = np.argmax(pred_logits.detach().cpu().numpy(),axis=1)
-        for pred in predictions:
-            full_preds.append(pred)
-        for lab in labels.detach().cpu().numpy():
-            full_gts.append(lab)
-            
-    mean_acc = accuracy_score(full_gts,full_preds)
-    mean_loss = np.mean(np.asarray(train_loss_list))
-    print('Total training loss {} and training Accuracy {} after {} epochs'.format(mean_loss,mean_acc,epoch))
-    
 
 
 def test(dataloader_test,epoch):
@@ -112,7 +77,7 @@ def test(dataloader_test,epoch):
         mean_loss = np.mean(np.asarray(val_loss_list))
         print('Total Test loss {} and Test accuracy {} after {} epochs'.format(mean_loss,mean_acc,epoch))
         
-        model_save_path = os.path.join('save_model', 'best_check_point_'+str(epoch)+'_'+str(mean_acc))
+        model_save_path = os.path.join('save_model', 'best_check_point_'+str(epoch)+'_'+str(mean_loss))
         state_dict = {'model': model.state_dict(),'optimizer': optimizer.state_dict(),'epoch': epoch}
         torch.save(state_dict, model_save_path)
     
