@@ -52,7 +52,7 @@ loss_fun = nn.CrossEntropyLoss()
 
 
 
-def test(dataloader_test,epoch):
+def test(dataloader_test):
     model.eval()
     with torch.no_grad():
         val_loss_list=[]
@@ -75,16 +75,11 @@ def test(dataloader_test,epoch):
                 
         mean_acc = accuracy_score(full_gts,full_preds)
         mean_loss = np.mean(np.asarray(val_loss_list))
-        print('Total Test loss {} and Test accuracy {} after {} epochs'.format(mean_loss,mean_acc,epoch))
+        print('Total Test loss {} and Test accuracy {}'.format(mean_loss,mean_acc))
         
-        model_save_path = os.path.join('save_model', 'best_check_point_'+str(epoch)+'_'+str(mean_loss))
-        state_dict = {'model': model.state_dict(),'optimizer': optimizer.state_dict(),'epoch': epoch}
-        torch.save(state_dict, model_save_path)
-    
+      
 if __name__ == '__main__':
-    for epoch in range(args.num_epochs):
-        train(dataloader_train,epoch)
-        test(dataloader_test,epoch)
+    test(dataloader_test)
         
     
     

@@ -112,7 +112,7 @@ def test(dataloader_test,epoch):
         mean_loss = np.mean(np.asarray(val_loss_list))
         print('Total Test loss {} and Test accuracy {} after {} epochs'.format(mean_loss,mean_acc,epoch))
         
-        model_save_path = os.path.join('save_model', 'best_check_point_'+str(epoch)+'_'+str(mean_acc))
+        model_save_path = os.path.join('save_model', 'best_check_point_'+str(epoch)+'_'+str(mean_loss))
         state_dict = {'model': model.state_dict(),'optimizer': optimizer.state_dict(),'epoch': epoch}
         torch.save(state_dict, model_save_path)
     
