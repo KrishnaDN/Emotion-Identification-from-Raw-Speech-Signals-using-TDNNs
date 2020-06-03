@@ -22,7 +22,7 @@ from sklearn.metrics import accuracy_score
 from utils.utils_wav import speech_collate
 import torch.nn.functional as F
 torch.multiprocessing.set_sharing_strategy('file_system')
-
+import glob
 
 ########## Argument parser
 parser = argparse.ArgumentParser(add_help=False)
@@ -46,7 +46,7 @@ dataloader_test = DataLoader(dataset_test, batch_size=args.batch_size,shuffle=Tr
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 model = Emo_Raw_TDNN(args.input_dim, args.num_classes).to(device)
-model.load_state_dict(torch.load('save_model/best_check_point_92_0.7870102085965744')['model'])
+
 optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0, betas=(0.9, 0.98), eps=1e-9)
 loss_fun = nn.CrossEntropyLoss()
 
@@ -75,11 +75,14 @@ def test(dataloader_test):
                 
         mean_acc = accuracy_score(full_gts,full_preds)
         mean_loss = np.mean(np.asarray(val_loss_list))
-        print('Total Test loss {} and Test accuracy {}'.format(mean_loss,mean_acc))
-        
+        #print('Total Test loss {} and Test accuracy {}'.format(mean_loss,mean_acc))
+    return mean_acc
       
 if __name__ == '__main__':
-    test(dataloader_test)
-        
+    all_models = sorted(glob.glob('save_model/*'))
+    for model_path in all_models:
+        model.load_state_dict(torch.load(model_path)['model'])
+        acc = test(dataloader_test)
+        print('Accuracy {} for model {}'.format(acc,model_path))
     
     
