@@ -3,7 +3,7 @@
 This repo contains the implementation of the paper Emotion Identification from raw speech signals using DNNs" 
 By Mousmita Sarma, Pegah Ghahremani, Daniel Povey, Nagendra Kumar Goel,Kandarpa Kumar Sarma, Najim Dehak in Pytorch
 The paper is published in Interspeech 2018
-Paper: https://www.isca-speech.org/archive/Interspeech_2018/pdfs/0993.pdf
+Paper: https://danielpovey.com/files/2018_interspeech_emotion_id.pdf
 
 ## Installation
 
